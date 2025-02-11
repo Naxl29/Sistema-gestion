@@ -14,12 +14,7 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-
--- Volcando estructura de base de datos para ventas_2025
-CREATE DATABASE IF NOT EXISTS `ventas_2025` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `ventas_2025`;
-
--- Volcando estructura para tabla ventas_2025.clientes
+ventas_2025ventas_2025ventas_2025abla ventas_2025.clientes
 CREATE TABLE IF NOT EXISTS `clientes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `id_cliente` int NOT NULL,
