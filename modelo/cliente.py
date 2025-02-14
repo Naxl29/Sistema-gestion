@@ -16,16 +16,25 @@ def conexion():
         return None
 
 def insertar_cliente(pri_nombre, seg_nombre, pri_apellido, seg_apellido, documento, correo, direccion):
+    if not pri_nombre or not pri_apellido or not documento:
+        print("Los campos primer nombre, primer apellido y documento son obligatorios")
+        return False
+
     conn = conexion()
     if conn is None:
         return False
 
     try:
         cursor = conn.cursor()
-        sql = """INSERT INTO personas (pri_nombre, seg_nombre, pri_apellido, seg_apellido, documento, correo_electronico, direccion_residencia, fecha_registro)
+        sql = """INSERT INTO personas (pri_nombre, seg_nombre, pri_apellido, seg_apellido, 
+                 id_cliente, correo_electronico, direccion_residencia, fecha_registro)
                  VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())"""
         valores = (pri_nombre, seg_nombre, pri_apellido, seg_apellido, documento, correo, direccion)
         cursor.execute(sql, valores)
+
+        sql_cliente = "INSERT INTO clientes (id_cliente) VALUES (%s)"
+        cursor.execute(sql_cliente, (documento,))
+        
         conn.commit()
         return True
     except Exception as e:
@@ -41,9 +50,15 @@ def obtener_clientes():
         return []
 
     try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM personas")
+        cursor = conn.cursor(dictionary=True)
+        # Modificamos la consulta para obtener solo de la tabla personas
+        cursor.execute("""
+            SELECT * FROM personas 
+            ORDER BY fecha_registro DESC
+        """)
         clientes = cursor.fetchall()
+        if clientes:
+            print(f"Se encontraron {len(clientes)} registros en la base de datos")
         return clientes
     except Exception as e:
         print(f"Error al obtener los clientes: {e}")
@@ -59,8 +74,14 @@ def eliminar_cliente(id_cliente):
 
     try:
         cursor = conn.cursor()
-        sql = "DELETE FROM personas WHERE id_cliente = %s"
-        cursor.execute(sql, (id_cliente,))
+        # Primero eliminamos de la tabla clientes
+        sql_cliente = "DELETE FROM clientes WHERE id_cliente = %s"
+        cursor.execute(sql_cliente, (id_cliente,))
+        
+        # Luego eliminamos de la tabla personas
+        sql_persona = "DELETE FROM personas WHERE id_cliente = %s"
+        cursor.execute(sql_persona, (id_cliente,))
+        
         conn.commit()
         return cursor.rowcount > 0
     except Exception as e:
@@ -71,15 +92,23 @@ def eliminar_cliente(id_cliente):
         conn.close()
 
 def actualizar_cliente(id_cliente, pri_nombre, seg_nombre, pri_apellido, seg_apellido, correo, direccion, documento):
+    if not pri_nombre or not pri_apellido or not documento:
+        print("Los campos primer nombre, primer apellido y documento son obligatorios")
+        return False
+
     conn = conexion()
     if conn is None:
         return False
 
     try:
         cursor = conn.cursor()
-        sql = """UPDATE personas SET pri_nombre = %s, seg_nombre = %s, pri_apellido = %s, seg_apellido = %s, correo_electronico = %s, direccion_residencia = %s, documento = %s
+        sql = """UPDATE personas 
+                 SET pri_nombre = %s, seg_nombre = %s, pri_apellido = %s, 
+                     seg_apellido = %s, correo_electronico = %s, 
+                     direccion_residencia = %s
                  WHERE id_cliente = %s"""
-        valores = (pri_nombre, seg_nombre, pri_apellido, seg_apellido, correo, direccion, documento, id_cliente)
+        valores = (pri_nombre, seg_nombre, pri_apellido, seg_apellido, 
+                  correo, direccion, id_cliente)
         cursor.execute(sql, valores)
         conn.commit()
         return cursor.rowcount > 0
