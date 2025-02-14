@@ -1,5 +1,7 @@
-import controlador
-import controlador.controlador_cliente
+from vista import vista_cliente
 
-# Llamar al menú del cliente
-controlador.controlador_cliente.mostrar_menu_cliente()
+def main():
+    vista_cliente.ejecutar_menu()
+
+if __name__ == "__main__":
+    main()
