@@ -25,11 +25,9 @@ proyecto/
 ├── controllers/
 │   └── controlador_cliente.py
 ├── models/
-│   ├── cliente.py
-│   └── person.py
+│   └── cliente.py
 ├── views/
 │   └── vista_cliente.py
-├── config.py
 ├── main.py
 └── README.md
 ```
