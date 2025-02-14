@@ -32,16 +32,24 @@ def eliminar_cliente():
     else:
         vista_cliente.mostrar_mensaje("❌ No se encontró un cliente con ese ID.")
 
+
 def actualizar_cliente():
     id_cliente = vista_cliente.obtener_id_cliente()
+    
+    # Verificar si el cliente existe antes de continuar
+    if not cliente.cliente_existe(id_cliente):
+        vista_cliente.mostrar_mensaje("❌ No existe un cliente con ese ID en la base de datos.")
+        return
+        
     datos_cliente = vista_cliente.obtener_datos_cliente()
     pri_nombre, seg_nombre, pri_apellido, seg_apellido, documento, correo, direccion = datos_cliente
 
     if correo and not validar_correo(correo):
-        vista_cliente.mostrar_mensaje("Error: Formato de correo electrónico inválido")
+        vista_cliente.mostrar_mensaje("❌ Error: Formato de correo electrónico inválido")
         return
 
-    if cliente.actualizar_cliente(id_cliente, pri_nombre, seg_nombre, pri_apellido, seg_apellido, correo, direccion, documento):
-        vista_cliente.mostrar_mensaje("✅ Cliente actualizado exitosamente.")
+    success, mensaje = cliente.actualizar_cliente(id_cliente, pri_nombre, seg_nombre, pri_apellido, seg_apellido, correo, direccion, documento)
+    if success:
+        vista_cliente.mostrar_mensaje(f"✅ {mensaje}")
     else:
-        vista_cliente.mostrar_mensaje("❌ Error al actualizar el cliente.")
+        vista_cliente.mostrar_mensaje(f"❌ {mensaje}")

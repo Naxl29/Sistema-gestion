@@ -43,7 +43,7 @@ def obtener_datos_cliente():
             break
         print("❌ El documento debe contener solo números.")
     
-    correo = input("Ingrese el correo electrónico (opcional): ").strip()
+    correo = input("Ingrese el correo electrónico (obligatorio): ").strip()
     direccion = input("Ingrese la dirección de residencia (opcional): ").strip()
      
     return pri_nombre, seg_nombre, pri_apellido, seg_apellido, documento, correo, direccion

@@ -15,6 +15,24 @@ def conexion():
         print(f"Error en la conexión: {e}")
         return None
 
+def cliente_existe(id_cliente):
+    conn = conexion()
+    if conn is None:
+        return False
+
+    try:
+        cursor = conn.cursor(dictionary=True)
+        sql = "SELECT COUNT(*) as count FROM personas WHERE id_cliente = %s"
+        cursor.execute(sql, (id_cliente,))
+        resultado = cursor.fetchone()
+        return resultado['count'] > 0
+    except Exception as e:
+        print(f"Error al verificar el cliente: {e}")
+        return False
+    finally:
+        cursor.close()
+        conn.close()
+
 def insertar_cliente(pri_nombre, seg_nombre, pri_apellido, seg_apellido, documento, correo, direccion):
     if not pri_nombre or not pri_apellido or not documento:
         print("Los campos primer nombre, primer apellido y documento son obligatorios")
@@ -26,12 +44,15 @@ def insertar_cliente(pri_nombre, seg_nombre, pri_apellido, seg_apellido, documen
 
     try:
         cursor = conn.cursor()
+        
+        # Primero insertamos en la tabla personas
         sql = """INSERT INTO personas (pri_nombre, seg_nombre, pri_apellido, seg_apellido, 
                  id_cliente, correo_electronico, direccion_residencia, fecha_registro)
                  VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())"""
         valores = (pri_nombre, seg_nombre, pri_apellido, seg_apellido, documento, correo, direccion)
         cursor.execute(sql, valores)
-
+        
+        # Luego insertamos en la tabla clientes
         sql_cliente = "INSERT INTO clientes (id_cliente) VALUES (%s)"
         cursor.execute(sql_cliente, (documento,))
         
@@ -58,7 +79,7 @@ def obtener_clientes():
         """)
         clientes = cursor.fetchall()
         if clientes:
-            print(f"Se encontraron {len(clientes)} registros en la base de datos")
+            print(f"\nSe encontraron {len(clientes)} registros en la base de datos")
         return clientes
     except Exception as e:
         print(f"Error al obtener los clientes: {e}")
@@ -68,6 +89,9 @@ def obtener_clientes():
         conn.close()
 
 def eliminar_cliente(id_cliente):
+    if not cliente_existe(id_cliente):
+        return False
+
     conn = conexion()
     if conn is None:
         return False
@@ -92,13 +116,15 @@ def eliminar_cliente(id_cliente):
         conn.close()
 
 def actualizar_cliente(id_cliente, pri_nombre, seg_nombre, pri_apellido, seg_apellido, correo, direccion, documento):
+    if not cliente_existe(id_cliente):
+        return False, "Cliente no encontrado"
+
     if not pri_nombre or not pri_apellido or not documento:
-        print("Los campos primer nombre, primer apellido y documento son obligatorios")
-        return False
+        return False, "Los campos primer nombre, primer apellido y documento son obligatorios"
 
     conn = conexion()
     if conn is None:
-        return False
+        return False, "Error de conexión a la base de datos"
 
     try:
         cursor = conn.cursor()
@@ -111,10 +137,9 @@ def actualizar_cliente(id_cliente, pri_nombre, seg_nombre, pri_apellido, seg_ape
                   correo, direccion, id_cliente)
         cursor.execute(sql, valores)
         conn.commit()
-        return cursor.rowcount > 0
+        return True, "Cliente actualizado exitosamente"
     except Exception as e:
-        print(f"Error al actualizar el cliente: {e}")
-        return False
+        return False, f"Error al actualizar el cliente: {e}"
     finally:
         cursor.close()
         conn.close()
